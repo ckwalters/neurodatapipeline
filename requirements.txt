@@ -1,0 +1,7 @@
+## This package was tested on these versions but should work on all recent versions.
+
+matplotlib==3.10.8
+numpy==2.4.4
+pandas==3.0.2
+python-json-logger==4.1.0
+tkinter==8.6.15
