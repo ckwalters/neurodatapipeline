@@ -10,7 +10,7 @@ import spikeinterface.qualitymetrics as sqm
 import spikeinterface.curation as sc
 import spikeinterface.widgets as sw
 from pathlib import Path
-from .pipeline_io import *
+from .config import *
 
 
 si.set_global_job_kwargs(**dict(n_jobs=16))
@@ -25,8 +25,10 @@ def main():
         return 0
 
 
-def node_sortinganalyzer(recording_path):
-    SuperAnalyzer(recording_path, make_plots=True)
+def node_sortinganalyzer(recording_path: Path):
+    """Create sorting analyzer from recording path."""
+
+    SuperAnalyzer(recording_path, make_plots=MAKE_QC_PLOTS)
 
 
 class SuperAnalyzer:
@@ -35,6 +37,11 @@ class SuperAnalyzer:
 
         """
         Wrapper class for spikeinterface sorting analyzer and plotting functions.
+        Parameters:
+            recording_path (Path): single-probe recording subdirectory
+            sorting_str (str): name of sorting instance (if None, latest sorting will be selected)
+            analyzer_name (str): name of sorting analyzer generated
+            make_plots (bool): generates and saves unit quality control plots
         """
 
         # Recording path
@@ -158,7 +165,7 @@ class SuperAnalyzer:
 
         return True
 
-    def curate_units(self, phy=True, auto=False):
+    def curate_units(self, phy=PHY_CURATION, auto=AUTO_CURATION):
         """Label units as 'good' based on phy curation and/or calculated metrics."""
 
         # Manual curation with phy

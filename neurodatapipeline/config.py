@@ -11,15 +11,21 @@ KS_ENV = "ks4"
 SI_ENV = "si"
 
 # Organized and processed data path
-SESSIONS_PATH = Path("") # Session-based data
+SESSIONS_PATH = Path("")  # session-level data directories
 
 # Session-level folder datetime pattern
 SESSION_DT_PATTERN = r"%Y-%m-%d_%H-%M-%S"
 
-# Pipeline logging
+# Processing settings
+PHY_CURATION = True
+MAKE_QC_PLOTS = True
+
+# Session processing state
 STATES_PATH = SESSIONS_PATH / "session_states.json"
+
+# Pipeline logging
 LOG_PATH = "sortinglib/pipeline_log.json"
-GLOBAL_WRITE = True
+GLOBAL_WRITE = True  # False suppresses logging to disk
 
 
 ## Organize raw data

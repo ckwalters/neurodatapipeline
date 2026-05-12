@@ -90,10 +90,11 @@ def pipeline_probe(rec_dir: Path, nodes=["kilosort", "sa"]):
     if "sa" not in nodes:
         return 22
 
-    # Check if phy curation has occured, break if not
-    phy_status = node_phy(ks_dir)
-    if phy_status!=0:
-        return phy_status
+    # If phy is required, check if phy curation has occured, break if not
+    if PHY_CURATION:
+        phy_status = node_phy(ks_dir)
+        if phy_status!=0:
+            return phy_status
 
     # Run sorting analyzer node, break if error returned
     sa_status = node_sortinganalyzer(ks_dir)
