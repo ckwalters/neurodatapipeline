@@ -17,6 +17,7 @@ SESSIONS_PATH = Path("")  # session-level data directories
 SESSION_DT_PATTERN = r"%Y-%m-%d_%H-%M-%S"
 
 # Processing settings
+CATGT_CAR = True  # if True, CatGT will apply common median referencing to data
 PHY_CURATION = True
 MAKE_QC_PLOTS = True
 
@@ -30,7 +31,7 @@ GLOBAL_WRITE = True  # False suppresses logging to disk
 
 ## Organize raw data
 # Subject ID regex; set to None if no subject IDs used
-SUBJECT_ID_PATTERN = r"Subject"+r"\d{2}"
+SUBJECT_ID_PATTERN = r"Subject" + r"\d{2}"
 
 # SpikeGLX data
 SGLXDATA_PATH = Path("")
@@ -50,5 +51,5 @@ BEHAVIOR_PATTERNS = {
     "video": {
         "dt_format": r"%Y-%m-%d_%H-%M-%S",
         "dt_regex": "\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}",
-    }
+    },
 }

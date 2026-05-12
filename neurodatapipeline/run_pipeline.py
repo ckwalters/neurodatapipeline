@@ -21,10 +21,10 @@ def run_pipeline(search_all=False, search_key="", nodes=None):
     """
     # Find sessions
     session_paths = search_sessions(search_all, search_key, nodes, mode="any")
-    
+
     # Run pipeline on each session path
     pipeline_loop(session_paths, nodes)
-    
+
     # Update session log
     update_session_states()
 
@@ -90,7 +90,8 @@ class StopButton:
             height=12,
             bg="white",
             fg="black",
-            command=self.stop)
+            command=self.stop,
+        )
         self.button.pack()
         self._job = self.root.after(1000, self.check_continue)
         self.root.mainloop()
