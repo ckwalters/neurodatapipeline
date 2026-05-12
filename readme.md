@@ -23,7 +23,7 @@ During acquisition, the Neuropixels recording card sends 1Hz sync TTL pulses to 
   - GUI for inspecting clusters found by Kilosort, merging and cutting clusters, and labeling each cluster. This is the only step which is optional, but highly recommended. You may also want to look at SpikeInterface's GUI option, which allows for visualization but not cluster cutting.
   - Install in a dedicated conda environment per repo instructions.
 ### [SpikeInterface](https://github.com/SpikeInterface/spikeinterface): Calculate sorting quality metrics
-  - Calculate a plethora of sorted unit quality metrics using the SpikeInterface sorting analyzer interface. Default quality metrics can found in the __ file, and can be easily customized.
+  - Calculate a plethora of sorted unit quality metrics using the SpikeInterface sorting analyzer interface. Default quality metrics can found in si_sorting_analyzer.py and can be easily customized.
   - If you choose not to manually label unit quality in Phy, you can set quality metric thresholds to label unit quality with this pipeline node (set in config.py).
   - A per-unit summary figure can be generated (set in config.py, default is True) to plot the unit waveforms, autocorrelograms, amplitudes across recording, cell type characteristics, and location on probe.
   - Install in a dedicated conda environment per repo instructions.
