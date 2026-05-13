@@ -39,14 +39,6 @@ def check_disk_space(root: Path = SESSIONS_PATH, threshold_gB=500):
         return True
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(message)s",
-    datefmt=r"%Y-%m-%d %H:%M:%S",
-    handlers=[logging.FileHandler(LOG_PATH)],
-)
-
-
 def make_json_logger():
     logger = logging.getLogger("pipeline_logger")
     logger.setLevel(logging.DEBUG)  # will accept debug and above
