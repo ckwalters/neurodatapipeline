@@ -50,6 +50,36 @@ Search sessions by search key and/or by which processing steps have not been com
 **run_pipeline()**<br>
 Run automated pipeline on selected data. A GUI element will allow you to gracefully exit the pipeline after the current session has completed processing.
 
+### Local Data Organization
+The pipeline utilizes a session-level file organizational structure. One session consists of one SpikeGLX recording session (or a concatenated recording), which may include any number of individual probe recording files, and its associated behavioral data, if applicable. The standard SpikeGLX file structure for both raw data and t-shifted data (after running CatGT) is maintained, and each subsequent processing step is locatd in a child subdirectory. Specifically, each probe recording gets a kilosort4 output folder, which in turn gets a spikeinterface output folder.
+
+```
+.
+└── Subject01_YYYY-MM-DD_HH-MM-SS/
+    ├── ephys-sglx/
+    │   └── recordingname/
+    │       ├── recordingname_imec0/
+    │       │   └── ...
+    │       └── recordingname_imec1/
+    │           └── ...
+    ├── ephys-catgt/
+    │   └── recordingname/
+    │       ├── recordingname_imec0/
+    │       │   ├── recordingname_tcat.imec0.ap.bin
+    │       │   ├── recordingname_tcat.imec0.ap.meta
+    │       │   ├── [extracted and synced TTL events]
+    │       │   └── kilosort4/
+    │       │       ├── [sorting results]
+    │       │       └── sorting_analyzer/
+    │       │           └── [curation results]
+    │       └── recordingname_imec1/
+    │           └── ...
+    ├── behavior/
+    │   └── behaviorname.txt
+    └── video/
+        └── videoname.mp4
+```
+
 ### Logging
 A session state log is generated and updated and stored in the session-level directory. This log is used to search for sessions based on which processing steps have not been completed.
 
