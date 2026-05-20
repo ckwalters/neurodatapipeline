@@ -34,21 +34,24 @@ During acquisition, the Neuropixels recording card sends 1Hz sync TTL pulses to 
 
 ## Usage
 
-**config.py**<br>
+**`config.py`**<br>
 Update this file with your machine's data directories, paths to CatGT and TPrime executables, names of conda environments, file name formats, and processing options.
 
-**example_script.py**<br>
+**`example_script.py`**<br>
 Quick start script for running the pipeline.
 
 ### Functions
-**organize_new_sessions()**<br>
+**`organize_new_sessions()`**<br>
 Organize raw data into session-level directories ready for processing.
 
-**find_sessions()**<br>
+**`find_sessions()`**<br>
 Search sessions by search key and/or by which processing steps have not been completed.
 
-**run_pipeline()**<br>
+**`run_pipeline()`**<br>
 Run automated pipeline on selected data. A GUI element will allow you to gracefully exit the pipeline after the current session has completed processing.
+
+![Example unit](docs/example_unit.png)
+<small>Example unit recorded in hippocampal dCA1 on a 4-shank Neuropixels probe, sorted and visualized with the pipeline. Other accepted units are plotted in cyan, while rejected clusters are plotted in gray.</small>
 
 ### Local Data Organization
 The pipeline utilizes a session-level file organizational structure. One session consists of one SpikeGLX recording session (or a concatenated recording), which may include any number of individual probe recording files, and its associated behavioral data, if applicable. The standard SpikeGLX file structure for both raw data and t-shifted data (after running CatGT) is maintained, and each subsequent processing step is locatd in a child subdirectory. Specifically, each probe recording gets a kilosort4 output folder, which in turn gets a spikeinterface output folder.
