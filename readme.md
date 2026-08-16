@@ -54,7 +54,7 @@ Run automated pipeline on selected data. A GUI element will allow you to gracefu
 <small>Example unit recorded in hippocampal dCA1 on a 4-shank Neuropixels probe, sorted and visualized with the pipeline. Other accepted units are plotted in cyan, while rejected clusters are plotted in gray.</small>
 
 ### Local Data Organization
-The pipeline utilizes a session-level file organizational structure. One session consists of one SpikeGLX recording session (or a concatenated recording), which may include any number of individual probe recording files, and its associated behavioral data, if applicable. The standard SpikeGLX file structure for both raw data and t-shifted data (after running CatGT) is maintained, and each subsequent processing step is locatd in a child subdirectory. Specifically, each probe recording gets a kilosort4 output folder, which in turn gets a spikeinterface output folder.
+The pipeline utilizes a session-level file organizational structure. One session consists of one SpikeGLX recording session (or a concatenated recording), which may include any number of individual probe recording files, and its associated behavior data, if applicable. The standard SpikeGLX file structure for both raw data and t-shifted data (after running CatGT) is maintained, and each subsequent processing step is locatd in a child subdirectory. Specifically, each probe recording gets a kilosort4 output folder, which in turn gets a spikeinterface output folder.
 
 ```
 .
