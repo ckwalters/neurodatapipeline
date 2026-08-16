@@ -30,7 +30,7 @@ During acquisition, the Neuropixels recording card sends 1Hz sync TTL pulses to 
 ### [TPrime](https://billkarsh.github.io/SpikeGLX/#tprime): Synchronizing data streams
   - Any neural data recorded on more than one headstage and any behavior data recorded on the NI DAQ board are not synchronized online at the time of recording, so they must be synced offline. TPrime simply converts timestamps (extracted by CatGT from the 1Hz sync pulse and any additional TTL pulses) from one reference frame to another.
   - The default behavior in the pipeline is to convert all other streams to the imec0 (first probe) reference frame.
-  - Install by downloading .exe and pointint to this path in config.py.
+  - Install by downloading .exe and pointing to its path in config.py.
 
 ## Usage
 
