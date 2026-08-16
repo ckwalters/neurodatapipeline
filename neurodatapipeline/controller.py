@@ -3,9 +3,9 @@ import tkinter as tk
 import tkinter.font as font
 from threading import Thread
 from .config import *
-from .pipeline_nodes import pipeline
+from .processing_nodes import pipeline
 from .session_state_log import search_sessions, update_session_states
-from .pipeline_io import check_disk_space, log
+from .io_utils import check_disk_space, log
 
 
 # Globals
@@ -13,23 +13,32 @@ stop = False
 stopped = False
 
 
-def run_pipeline(search_all=False, search_key="", nodes=None):
+def run_pipeline(search_key="", by_processing_state=True, nodes=None):
     """
     Run neurodata processing and spike sorting pipeline.
-    Current node options (run in order, do not omit earlier nodes):
-        ["catgt", "tprime", "kilosort", "sa"]
+    Parameters:
+        by_processing_state (bool): search for sessions to run by whether processing
+                                    nodes in nodes have been applied
+        search_key (str): match this key when looking for sessions to process
+                          (only applies when by_processing_state=False)
+        nodes (list[str]): which steps to run from ["catgt", "tprime", "kilosort", "sa"]
     """
     # Find sessions
-    session_paths = search_sessions(search_all, search_key, nodes, mode="any")
+    session_paths = search_sessions(
+        searach_key=search_key,
+        by_processing_state=by_processing_state,
+        nodes=nodes,
+        mode="any",
+    )
 
     # Run pipeline on each session path
-    pipeline_loop(session_paths, nodes)
+    process_sessions(session_paths, nodes)
 
     # Update session log
     update_session_states()
 
 
-def pipeline_loop(session_paths: list, nodes=None):
+def process_sessions(session_paths: list[Path], nodes=None):
     """
     Main loop for running pipeline on each session with button to end gracefully
     after current session is completed. Codes: 9X
@@ -49,28 +58,34 @@ def pipeline_loop(session_paths: list, nodes=None):
     t1 = Thread(target=StopButton)
     t1.start()
 
-    # Loop through found sessions
-    for session_path in session_paths:
-        # Run pipeline on session
-        tic = time.time()
-        pipeline(session_path, nodes=nodes)
-        log(f"{(time.time()-tic)/60:.0f} minutes", session_path.name)
+    try:
+        # Loop through sessions
+        for session_path in session_paths:
+            # Run pipeline on session
+            tic = time.time()
+            pipeline(session_path, nodes=nodes)
+            log(f"{(time.time()-tic)/60:.0f} minutes", session_path.name)
 
-        # Running low on disk space?
-        if not check_disk_space():
-            log("Stopping: running low on disk space", c=93, n="pipeline_loop", w=True)
-            stopped = True
-            break
+            # Running low on disk space?
+            if not check_disk_space():
+                log("Stopping: running low on disk space", c=93, n="pipeline_loop", w=True)
+                stopped = True
+                break
 
-        # Stop button pressed
-        if stop:
-            log("Stopping: manual stop", c=92, n="pipeline_loop", w=True)
-            stopped = True
-            break
-
+            # Stop button pressed
+            if stop:
+                log("Stopping: manual stop", c=92, n="pipeline_loop", w=True)
+                stopped = True
+                break
+    
+    except Exception as e:
+        log(f"Stopping: exception occured  {e}", c=93, n="pipeline_loop", w=True)
+        stopped = True
+    
     # All sessions completed
     if not stopped:
         log("Completed running on all sessions", c=90, n="pipeline_loop", w=True)
+
     stopped = True
 
 

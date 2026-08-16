@@ -4,8 +4,8 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from .config import *
-from .pipeline_io import check_disk_space
-from .sglx_metadata import find_meta_path, readMeta
+from .io_utils import check_disk_space
+from .spikeglx_utils import find_meta_path, readMeta
 
 
 def organize_new_sessions(search_str: str = ""):

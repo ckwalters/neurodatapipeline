@@ -12,7 +12,7 @@ session_states fields:
 import json
 import pandas as pd
 from pathlib import Path
-from .pipeline_io import find_file
+from .io_utils import find_file
 from .config import *
 
 
@@ -37,7 +37,7 @@ def check_data(search_path: Path, key: str):
 
 
 def check_processing(rec_session_dir: Path):
-    """Check whether processing step has occured."""
+    """Check whether processing step has occured. Takes SGLX or CATGT output dir path."""
 
     state_dict = {}
 
@@ -48,8 +48,8 @@ def check_processing(rec_session_dir: Path):
         state_dict["tprime_bool"] = False
 
     # Individual probe recordings
-    rec_dirs = [d for d in rec_session_dir.iterdir() if "imec" in d.name]
-    state_dict["n_probes"] = len(rec_dirs)
+    recording_dirs = [d for d in rec_session_dir.iterdir() if "imec" in d.name]
+    state_dict["n_probes"] = len(recording_dirs)
 
     # Check each sorting step
     ks_status = 0
@@ -57,9 +57,9 @@ def check_processing(rec_session_dir: Path):
     sa_status = 0
     lfp_status = 0
     lfp_dfs_status = 0
-    for rec_dir in rec_dirs:
+    for recording_dir in recording_dirs:
         # Kilosort
-        ks_dir = find_file(rec_dir, "kilosort4", verbose=False)
+        ks_dir = find_file(recording_dir, "kilosort4", verbose=False)
         if ks_dir is None:
             ks_status += 1
             phy_status += 1
@@ -79,7 +79,7 @@ def check_processing(rec_session_dir: Path):
                 sa_status += 1
 
         # LFP
-        lfp_dir = find_file(rec_dir, "lfp")
+        lfp_dir = find_file(recording_dir, "lfp")
         if lfp_dir is None or (not any(lfp_dir.iterdir())):
             lfp_status += 1
             lfp_dfs_status += 1
@@ -170,8 +170,10 @@ def find_sessions(search_dict={}, mode="all", update=False):
     Search for sessions in session state log matching key/bool
     pairs in search_dict.
     Parameters:
-        search_dict (dict): key (states log key) value (bool) pairs
+        search_dict (dict[str, bool]): key (states log key) value (bool) pairs
         update (bool): if True, write updates to .json file
+    Returns:
+        session_paths (list[Path]): session-level paths 
     """
 
     # Default to all false (no processing steps completed)
@@ -213,12 +215,12 @@ def find_sessions(search_dict={}, mode="all", update=False):
 
 
 def search_sessions(
-    search_all=True, search_key="", nodes=None, mode="all", source_dir=SESSIONS_PATH
+    search_key="", by_processing_state=False, nodes=None, mode="all", source_dir=SESSIONS_PATH
 ):
     """Search for sessions either by search string or by states log."""
 
     # Search all sessions; optionally matching search key
-    if search_all:
+    if not by_processing_state:
         session_paths = [
             d for d in source_dir.iterdir() if d.is_dir() and (search_key in d.name)
         ]
@@ -231,6 +233,7 @@ def search_sessions(
         search_keys = [f"{node}_bool" for node in nodes]
     else:
         search_keys = None
+    
     # Find sessions where pipeline steps have not been completed
     session_names = find_sessions(
         search_dict=dict(zip(search_keys, [False] * len(search_keys))), mode=mode

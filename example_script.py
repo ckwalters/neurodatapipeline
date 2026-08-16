@@ -10,10 +10,14 @@ def main():
     ndp.organize_new_sessions("example_session")
     
     # Run pipeline
-    ndp.run_pipeline(search_all=True, search_key="example_session", nodes=["catgt", "tprime", "kilosort"])
+    ndp.run_pipeline(
+        search_all=True,
+        search_key="example_session",
+        nodes=["catgt", "tprime", "kilosort"]
+    )
 
     # Search for sessions that need data curation
-    print(ndp.find_sessions(search_dict={"kilosort_bool":True,"phy_bool":False}))
+    print(ndp.find_sessions(search_dict={"kilosort_bool":True, "phy_bool":False}))
 
 if __name__=="__main__":
     main()

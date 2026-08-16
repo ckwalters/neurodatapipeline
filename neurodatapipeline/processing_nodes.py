@@ -2,7 +2,7 @@ import subprocess
 import pandas as pd
 from pathlib import Path
 from .config import *
-from .pipeline_io import find_file, log
+from .io_utils import find_file, log
 from .tprime import tprime_pipeline_node
 from .catgt import catgt_pipeline_node
 
@@ -64,13 +64,14 @@ def pipeline(session_path: Path, nodes=None):
         )
         return 13
 
-    # Check if tprime has been run, run if not
-    if "tprime" in nodes:
-        tp_status = node_tprime(recording_dir)
-
     # End pipeline if recording-level nodes are not called
     if ("kilosort" not in nodes) and ("sa" not in nodes):
+        # Check if tprime has been run, run if not (spike times not needed)
+        if "tprime" in nodes:
+            tp_status = node_tprime(recording_dir)
+        
         log("Kilosort/sorting analyzer not called", session_path.name, 14)
+
         return 14
 
     ## RECORDING-LEVEL NODES
@@ -87,25 +88,29 @@ def pipeline(session_path: Path, nodes=None):
         log("Not all steps completed", session_path.name, 15)
         return 15
 
+    # Check if tprime has been run, run if not
+    if "tprime" in nodes:
+        tp_status = node_tprime(recording_dir)
+
     log("All steps complete", session_path.name, 10, n="pipeline", w=True)
     return 0
 
 
-def pipeline_probe(rec_dir: Path, nodes=["kilosort", "sa"]):
+def pipeline_probe(recording_dir: Path, nodes=["kilosort", "sa"]):
     """
     Run probe-specific pipeline processes (sorting, curation).
     Parameters:
-        rec_dir (Path): probe-level recording directory
+        recording_dir (Path): probe-level recording directory
         nodes (list[str]): selected processing steps from ["kilosort", "sa"]
     Returns:
         Codes 2X
     """
     # Run kilosort node
     if "kilosort" in nodes:
-        ks_status = node_kilosort(rec_dir)
+        ks_status = node_kilosort(recording_dir)
         if ks_status != 0:
             return ks_status
-    ks_dir = find_file(rec_dir, "kilosort4")
+    ks_dir = find_file(recording_dir, "kilosort4")
 
     # If phy is required, check if phy curation has occured
     if PHY_CURATION:
@@ -125,7 +130,10 @@ def pipeline_probe(rec_dir: Path, nodes=["kilosort", "sa"]):
 def node_catgt(session_dir: Path):
     """
     Node for running CatGT
-    Codes 3X
+    Parameters:
+        session_dir (Path): session-level path
+    Returns:
+        Codes 3X
     """
 
     # Check if CatGT has been run
@@ -140,8 +148,17 @@ def node_catgt(session_dir: Path):
         return 31
     recording_session_dir = find_file(sglx_dir, "")
 
+    # Make catgt probe arg key
+    probe_dirs = find_file(recording_session_dir, "imec", is_dir=True, retsingle=False)
+    if isinstance(probe_dirs, Path):
+        probe_key = "0"
+    else:
+        probe_idxs = [d.name[-1] for d in probe_dirs]
+        probe_idxs.sort()
+        probe_key = f"{probe_idxs[0]}:{probe_idxs[-1]}"
+
     # Run CatGT
-    cgt_status = catgt_pipeline_node(recording_session_dir)
+    cgt_status = catgt_pipeline_node(recording_session_dir, probes=probe_key)
     if cgt_status == 0:
         log("CatGT completed", p={session_dir.name}, c=30, n="catgt", w=True)
         return 0
@@ -153,7 +170,10 @@ def node_catgt(session_dir: Path):
 def node_tprime(recording_dir: Path):
     """
     Node for running tprime.
-    Codes 4X
+    Parameters:
+        recording_dir (Path): session-level path
+    Returns:
+        Codes 4X
     """
     session_name = recording_dir.parent.parent.name
 
@@ -189,7 +209,10 @@ def node_tprime(recording_dir: Path):
 def node_kilosort(recording_dir: Path):
     """
     Node for running kilosort4.
-    Codes 5X
+    Parameters:
+        recording_dir (Path): probe-level recording path
+    Returns:
+        Codes 5X
     """
     session_name = recording_dir.parent.parent.name
     log("Running Kilosort", p=session_name, r=recording_dir.name, n="kilosort")
@@ -231,7 +254,10 @@ def node_kilosort(recording_dir: Path):
 def node_phy(ks_dir: Path):
     """
     Check whether sorting has been curated in phy.
-    Codes 6X
+    Parameters:
+        ks_dir (Path): kilosort output path
+    Returns:
+        Codes 6X
     """
     session_name = ks_dir.parent.parent.parent.name
     phy_files = [f for f in ks_dir.iterdir() if "phy" in f.name]
@@ -242,7 +268,7 @@ def node_phy(ks_dir: Path):
         return 61
 
     # All units labeled
-    # TODO: use csv instead of pandas
+    # TODO: use csv module instead of pandas
     cluster_info = pd.read_csv(ks_dir / "cluster_info.tsv", sep="\t")
     if pd.isna(cluster_info["group"]).sum() > 5:
         log("Phy not finished", p=session_name, r=ks_dir.name, c=62, n="phy", w=True)
@@ -255,7 +281,10 @@ def node_phy(ks_dir: Path):
 def node_sortinganalyzer(ks_dir: Path):
     """
     Node for running spikeinterface sorting analyzer.
-    Codes 7X
+    Parameters:
+        ks_dir (Path): kilosort output path
+    Returns:
+        Codes 7X
     """
     session_name = ks_dir.parent.parent.parent.name
     log("Running Sorting Analyzer", p=session_name, r=ks_dir.name, n="sortinganalyzer")
@@ -311,11 +340,3 @@ def node_sortinganalyzer(ks_dir: Path):
             w=True,
         )
         return 71
-
-
-def node_lfp(rec_dir: Path):
-    """
-    TODO: Implement.
-    Codes 8X
-    """
-    return None

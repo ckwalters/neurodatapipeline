@@ -6,7 +6,6 @@ jenniferColonell/ecephys_spike_sorting/  3/28/24
 
 import json
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
 
 
@@ -489,6 +488,7 @@ def shankMapToGeom(meta: dict):
 
 def plotSaved(xCoord, yCoord, shankInd, meta: dict):
     """Plot x z positions of all electrodes and saved channels"""
+    import matplotlib.pyplot as plt
 
     geomList = getGeomParams(meta)
     # geomList =
@@ -509,7 +509,7 @@ def plotSaved(xCoord, yCoord, shankInd, meta: dict):
     xall[oddRows] = xall[oddRows] + geomList[4]
 
     yall = rowInd * geomList[6]
-
+    
     fig = plt.figure(figsize=(2, 12))
 
     shankSep = geomList[2]

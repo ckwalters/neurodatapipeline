@@ -1,7 +1,7 @@
 import subprocess
 import numpy as np
 from config import *
-from pipeline_io import find_file
+from .io_utils import find_file
 
 
 def tprime_pipeline_node(session_path: Path):

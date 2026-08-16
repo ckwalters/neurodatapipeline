@@ -1,17 +1,6 @@
 # Utilities
-from .config import *
-from .pipeline_io import *
-from .organize_data import *
-from .session_state_log import *
-from .sglx_metadata import find_meta_path, readMeta, EphysParams, MetaToCoords
-
-# Pipeline components
-from .catgt import *
-from .kilosort4_sorting import *
-from .si_sorting_analyzer import *
-from .phy import *
-from .tprime import *
+from .organize_data import organize_new_sessions, organize_existing_sessions, organize_recording_session
+from .session_state_log import find_sessions
 
 # Pipeline
-from .pipeline_nodes import *
-from .run_pipeline import *
+from .controller import run_pipeline

@@ -4,16 +4,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import spikeinterface.full as si
-import spikeinterface.extractors as se
-import spikeinterface.qualitymetrics as sqm
-import spikeinterface.curation as sc
-import spikeinterface.widgets as sw
 from pathlib import Path
 from .config import *
 
-
-si.set_global_job_kwargs(**dict(n_jobs=16))
+try:
+    import spikeinterface.full as si
+    import spikeinterface.extractors as se
+    import spikeinterface.qualitymetrics as sqm
+    import spikeinterface.curation as sc
+    import spikeinterface.widgets as sw
+    si.set_global_job_kwargs(**SI_GLOBAL_KWARGS)
+except ImportError:
+    print(f"Spikeinterface not available.")
 
 
 def main():
@@ -21,14 +23,14 @@ def main():
         print(f"Incorrect number of inputs.")
         return 1
     elif len(sys.argv) == 2:
-        node_sortinganalyzer(sys.argv[1])
-        return 0
+        sa = node_sortinganalyzer(sys.argv[1])
+        return sa.status
 
 
 def node_sortinganalyzer(recording_path: Path):
     """Create sorting analyzer from recording path."""
-
-    SuperAnalyzer(recording_path, make_plots=MAKE_QC_PLOTS)
+    
+    return SuperAnalyzer(recording_path, make_plots=MAKE_QC_PLOTS)
 
 
 class SuperAnalyzer:
@@ -48,6 +50,7 @@ class SuperAnalyzer:
             analyzer_name (str): name of sorting analyzer generated
             make_plots (bool): generates and saves unit quality control plots
         """
+        self.status = 99
 
         # Recording path
         self.recording_path = Path(recording_path)
@@ -93,6 +96,9 @@ class SuperAnalyzer:
                 os.mkdir(self.sorting_path / "qc_figures")
             self.make_qc_plots(export=True)
 
+        if formatted and curated:
+            self.status = 0
+
     def make_sorting_analyzer(self, apply_CMR=False):
         """Create new sorting analyzer for one probe recording/kilosort sorting."""
 
@@ -121,6 +127,7 @@ class SuperAnalyzer:
             folder=self.analyzer_path,
         )
 
+        # The specific order of calls matters; see SI docs
         sorting_analyzer.compute("random_spikes")
         sorting_analyzer.compute("waveforms", ms_before=1.0, ms_after=1.5)
         sorting_analyzer.compute("templates")
@@ -217,7 +224,7 @@ class SuperAnalyzer:
 
         return True
 
-    def curate_units(self, phy=PHY_CURATION, auto=AUTO_CURATION):
+    def curate_units(self, phy=PHY_CURATION):
         """Label units as 'good' based on phy curation and/or calculated metrics."""
 
         # Manual curation with phy
@@ -230,10 +237,7 @@ class SuperAnalyzer:
             )
             self.unit_info = pd.concat([self.unit_info, phy_label], axis=1)
 
-        # Automatic curation based on metrics
-        if auto:
-            # TODO implement auto curation
-            pass
+        # TODO implement additional curation based on metrics
 
         # Store list of good units
         self.good_units = []

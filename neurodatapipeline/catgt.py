@@ -5,7 +5,7 @@ from .config import *
 
 
 def catgt_pipeline_node(
-    session_sglx_path: Path, session_cgt_path=None, probes="0:1", event_bits=[1, 2]
+    session_sglx_path: Path, session_cgt_path=None, probes="0:1", event_bits=CATGT_EVENT_BITS,
 ):
     """Pipeline node for running catgt."""
 

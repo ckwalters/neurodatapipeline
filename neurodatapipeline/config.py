@@ -18,7 +18,10 @@ SESSION_DT_PATTERN = r"%Y-%m-%d_%H-%M-%S"
 
 # Processing settings
 CATGT_CAR = True  # if True, CatGT will apply common median referencing to data
+CATGT_EVENT_BITS = [1, 2]  # bits in NIDAQ stream to extract
+DRIFT_CORRECTION = True  # if disabled, kilosort will not apply drift correction (recommend keep set to True)
 PHY_CURATION = True
+SI_GLOBAL_KWARGS = dict(n_jobs=16)
 MAKE_QC_PLOTS = True
 
 # Session processing state

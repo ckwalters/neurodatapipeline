@@ -1,4 +1,4 @@
-import os
+import subprocess
 from .config import *
 from .session_state_log import find_sessions
 
@@ -75,11 +75,11 @@ def run_phy(
     params_path = ksout_path / "params.py"
 
     # Extract waveforms if phy has not been run before on this session
-    if (not ".phy" in next(os.walk(ksout_path))[1]) or force_waveforms:
-        os.system(f"phy extract-waveforms {params_path}")
+    if (not any([".phy" in p.name for p in ksout_path.iterdir()])) or force_waveforms:
+        subprocess.run(f"phy extract-waveforms {params_path}")
 
     # Run phy
-    os.system(f"phy template-gui {params_path}")
+    subprocess.run(f"phy template-gui {params_path}")
 
 
 if __name__ == "__main__":
