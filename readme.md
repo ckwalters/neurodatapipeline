@@ -15,7 +15,7 @@ During acquisition, the Neuropixels recording card sends 1Hz sync TTL pulses to 
 
 ### [CatGT](https://billkarsh.github.io/SpikeGLX/#catgt): Tshift and TTL time extraction
   - Correct for tiny timing shifts in the data created during recording by ADC multiplexing. Tthe correction function is called "Tshift" and is applied automatically whenever CatGT is run on a recording. CatGT also extracts sync pulse and behavior TTL edges, used for synching data streams.
-  - Install by downloading .exe and pointint to this path in config.py.
+  - Install by downloading .exe and pointing to its path in config.py.
 ### [Kilosort4](https://github.com/MouseLand/Kilosort): Spike sorting
   - Algorithmically detect action potentials in neuropixels recording data and cluster action potentials into putative single-unit clusters. Kilosort has become the field standard for sorting neuropixels data, but other options are available (see SpikeInterface documentation, below).
   - Install in a dedicated conda environment per repo instructions, paying attention to the step where you must uninstall the default pytorch installation and reinstall to be able to run on your GPU. When using pip to install packages in a conda environment, use "python -m pip install PackageName"
