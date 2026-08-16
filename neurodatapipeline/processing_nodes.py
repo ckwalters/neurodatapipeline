@@ -9,11 +9,20 @@ from .catgt import catgt_pipeline_node
 
 def pipeline(session_path: Path, nodes=None):
     """
-    Run pipeline nodes.
-    Codes 1X
+    Run pipeline processing steps.
+
+    Paramters:
+        session_path (Path): top-level session path
+        nodes (list[str]): selected processing steps from ["catgt", "tprime", "kilosort", "sa"]
+    Returns:
+        Codes 1X
     """
+    
+    all_nodes = ["catgt", "tprime", "kilosort", "sa"]
     if nodes is None:
-        nodes = ["catgt", "tprime", "kilosort", "sa"]
+        nodes = all_nodes
+    elif any([n not in all_nodes for n in nodes]):
+        log("Warning: non-recognized node(s) called", p=session_path.name, n="pipeline", w=True)
 
     log("Running on session", p=session_path.name, n="pipeline", w=True)
 
@@ -24,18 +33,24 @@ def pipeline(session_path: Path, nodes=None):
         return 11
 
     ## SESSION-LEVEL NODES
-
-    # End pipeline if catgt not called
-    if "catgt" not in nodes:
-        log("Catgt not called", session_path.name, 12)
+    # CatGT
+    if "catgt" in nodes:
+        # Check if catgt has been run, run if not
+        cgt_status = node_catgt(session_path)
+        if cgt_status != 0:
+            return cgt_status
+    
+    # Find catgt'd data
+    catgt_dir = find_file(session_path, "catgt")
+    if catgt_dir is None:
+        log(
+            "No catgt data found found",
+            p=session_path.name,
+            n="pipeline",
+            c=12,
+            w=True,
+        )
         return 12
-
-    # Check if catgt has been run, run if not
-    cgt_status = node_catgt(session_path)
-    if cgt_status == 0:
-        catgt_dir = find_file(session_path, "catgt")
-    else:
-        return cgt_status
 
     # Find recording session directory
     recording_dir = find_file(catgt_dir, "catgt")
@@ -79,35 +94,30 @@ def pipeline(session_path: Path, nodes=None):
 def pipeline_probe(rec_dir: Path, nodes=["kilosort", "sa"]):
     """
     Run probe-specific pipeline processes (sorting, curation).
-    Codes 2X
+    Parameters:
+        rec_dir (Path): probe-level recording directory
+        nodes (list[str]): selected processing steps from ["kilosort", "sa"]
+    Returns:
+        Codes 2X
     """
-
-    # Process lfp
-    lfp_status = node_lfp(rec_dir)
-
-    # Stop pipeline if kilosort not called for
-    if "kilosort" not in nodes:
-        return 21
-
-    # Run kilosort node, break if error returned
-    ks_status = node_kilosort(rec_dir)
-    if ks_status != 0:
-        return ks_status
+    # Run kilosort node
+    if "kilosort" in nodes:
+        ks_status = node_kilosort(rec_dir)
+        if ks_status != 0:
+            return ks_status
     ks_dir = find_file(rec_dir, "kilosort4")
 
-    if "sa" not in nodes:
-        return 22
-
-    # If phy is required, check if phy curation has occured, break if not
+    # If phy is required, check if phy curation has occured
     if PHY_CURATION:
         phy_status = node_phy(ks_dir)
         if phy_status != 0:
             return phy_status
 
-    # Run sorting analyzer node, break if error returned
-    sa_status = node_sortinganalyzer(ks_dir)
-    if sa_status != 0:
-        return sa_status
+    # Run sorting analyzer node
+    if "sa" in nodes: 
+        sa_status = node_sortinganalyzer(ks_dir)
+        if sa_status != 0:
+            return sa_status
 
     return 0
 
